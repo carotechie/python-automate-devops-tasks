@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-green.svg)](LICENSE)
-[![CI](https://github.com/carotechie/python-automatiza-devops/actions/workflows/ci.yml/badge.svg)](https://github.com/carotechie/python-automatiza-devops/actions/workflows/ci.yml)
+[![CI](https://github.com/carotechie/python-automate-devops-tasks/actions/workflows/ci.yml/badge.svg)](https://github.com/carotechie/python-automate-devops-tasks/actions/workflows/ci.yml)
 [![PyLadies](https://img.shields.io/badge/charla-PyLadies-EE4C2C)](https://pyladies.com/)
 [![Diapositivas](https://img.shields.io/badge/diapositivas-Google%20Slides-F4B400?logo=googleslides&logoColor=white)](https://docs.google.com/presentation/d/142oJcFDnBLSh6bWCx5NPI1e3EzgdBzDF2V2MMOxDpx8/edit?usp=sharing)
 
@@ -83,7 +83,7 @@ modifican ni borran recursos.
 Necesitas Python 3.10+, Docker, kubectl y kind ([guía 1](docs/01-instalar-python.md) y [guía 6](docs/06-kubernetes-local.md)).
 
 ```bash
-git clone https://github.com/carotechie/python-automatiza-devops.git && cd python-automatiza-devops
+git clone https://github.com/carotechie/python-automate-devops-tasks.git && cd python-automate-devops-tasks
 make setup
 make lab-up
 source .venv/bin/activate && source lab/lab.env
@@ -99,7 +99,7 @@ Cuando termines: `make lab-down`.
 <summary><strong>En Windows (sin make)</strong></summary>
 
 ```powershell
-git clone https://github.com/carotechie/python-automatiza-devops.git; cd python-automatiza-devops
+git clone https://github.com/carotechie/python-automate-devops-tasks.git; cd python-automate-devops-tasks
 py -m venv .venv; .\.venv\Scripts\Activate.ps1; pip install -r requirements-dev.txt
 docker compose -f lab/docker-compose.yml up -d --wait
 . .\lab\lab.env.ps1; python lab/seed_localstack.py
