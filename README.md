@@ -357,3 +357,4 @@ Cuéntamela en un issue o en redes: puede ser el próximo script de este repo.
 📽️ [Diapositivas de la charla](https://docs.google.com/presentation/d/142oJcFDnBLSh6bWCx5NPI1e3EzgdBzDF2V2MMOxDpx8/edit?usp=sharing) · 🌐 [tech.carolinaherreramonteza.com](https://tech.carolinaherreramonteza.com/#contact)
 # python-automate-devops-tasks
 # python-automate-devops-tasks
+# python-automate-devops-tasks
