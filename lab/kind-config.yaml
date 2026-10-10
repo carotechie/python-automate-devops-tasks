@@ -1,0 +1,7 @@
+# Cluster local para el laboratorio.
+# Créalo con: kind create cluster --config lab/kind-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: pyladies-lab
+nodes:
+  - role: control-plane

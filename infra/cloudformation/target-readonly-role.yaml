@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Rol de solo lectura en una cuenta destino, asumible desde la cuenta puente.
+  Despliégalo en cada cuenta destino (o con StackSets en toda la organización).
+
+Parameters:
+  HubAccountId:
+    Type: String
+    AllowedPattern: "^\\d{12}$"
+    Description: ID de la cuenta puente que puede asumir este rol.
+  RoleName:
+    Type: String
+    Default: ReadOnly
+    Description: Nombre del rol en esta cuenta.
+  MaxSessionDuration:
+    Type: Number
+    Default: 3600
+    MinValue: 3600
+    MaxValue: 43200
+    Description: Duración máxima de la sesión en segundos (1 h a 12 h).
+  RequireMFA:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Si es true, solo se puede asumir el rol con una sesión con MFA.
+
+Conditions:
+  UseMFA: !Equals [!Ref RequireMFA, "true"]
+
+Resources:
+  ReadOnlyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref RoleName
+      Description: Acceso de solo lectura desde la cuenta puente
+      MaxSessionDuration: !Ref MaxSessionDuration
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/ReadOnlyAccess
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${HubAccountId}:root"
+            Action: sts:AssumeRole
+            Condition: !If
+              - UseMFA
+              - Bool:
+                  aws:MultiFactorAuthPresent: "true"
+              - !Ref AWS::NoValue
+      Tags:
+        - Key: managed-by
+          Value: python-automatiza-devops
+
+Outputs:
+  RoleArn:
+    Description: ARN para usar con hub_switch.py
+    Value: !GetAtt ReadOnlyRole.Arn

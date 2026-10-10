@@ -1,0 +1,20 @@
+# Falla a propósito: la imagen no existe -> ErrImagePull / ImagePullBackOff.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: broken-image
+  namespace: lab
+  labels: {app: broken-image, env: dev}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: broken-image}
+  template:
+    metadata:
+      labels: {app: broken-image, env: dev}
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/pyladies-lab/esta-imagen-no-existe:0.0.0
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}

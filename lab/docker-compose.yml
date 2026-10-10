@@ -1,0 +1,19 @@
+# LocalStack: emula APIs de AWS en tu máquina, sin costo.
+# Levántalo con: make lab-up   (o: docker compose -f lab/docker-compose.yml up -d)
+services:
+  localstack:
+    image: localstack/localstack:${LOCALSTACK_VERSION:-4.9}
+    container_name: pyladies-localstack
+    ports:
+      - "127.0.0.1:4566:4566"
+    environment:
+      - SERVICES=ec2,sts,iam,s3
+      - DEBUG=0
+      # Si tu versión de LocalStack pide token, crea una cuenta gratuita y exporta
+      # LOCALSTACK_AUTH_TOKEN antes de ejecutar make lab-up.
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN:-}
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20

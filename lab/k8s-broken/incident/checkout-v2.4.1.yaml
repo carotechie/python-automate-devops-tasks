@@ -1,0 +1,54 @@
+# App para practicar triage (diapositiva 08), paso 2: el "cambio" que rompe todo.
+# v2.4.1 necesita una base en db:5432, que no existe, así que los pods nuevos
+# entran en CrashLoopBackOff y el rollout se queda trabado con 1 de 3 réplicas listas.
+#
+# make lab-up lo aplica solo. A mano:
+#   kubectl --context kind-pyladies-lab apply -f lab/k8s-broken/incident/
+# Prueba: python 04-triage-incidentes/triage.py --namespace lab --app checkout
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+  namespace: lab
+  labels: {app: checkout, env: staging}
+  annotations:
+    kubernetes.io/change-cause: "v2.4.1: mueve el carrito a postgres"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 0, maxUnavailable: 2}
+  selector:
+    matchLabels: {app: checkout}
+  template:
+    metadata:
+      labels: {app: checkout, env: staging, app.kubernetes.io/version: v2.4.1}
+    spec:
+      containers:
+        - name: checkout
+          image: busybox:1.36
+          env:
+            - name: APP_VERSION
+              value: v2.4.1
+            - name: DATABASE_HOST
+              value: db
+            - name: DATABASE_PORT
+              value: "5432"
+          command:
+            - sh
+            - -c
+            - |
+              echo "checkout ${APP_VERSION} starting"
+              echo "connecting to postgres at ${DATABASE_HOST}:${DATABASE_PORT}"
+              for attempt in 1 2 3; do
+                if nc -z -w 2 "${DATABASE_HOST}" "${DATABASE_PORT}" 2>/dev/null; then
+                  echo "database connection ok"
+                  exec sleep 360000
+                fi
+                echo "attempt ${attempt}/3: could not connect to ${DATABASE_HOST}:${DATABASE_PORT}"
+                sleep 1
+              done
+              echo "ConnectionError: could not connect to ${DATABASE_HOST}:${DATABASE_PORT}"
+              exit 1
+          resources:
+            requests: {cpu: 10m, memory: 8Mi}

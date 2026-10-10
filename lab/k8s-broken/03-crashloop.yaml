@@ -1,0 +1,21 @@
+# Falla a propósito: el comando termina con error -> CrashLoopBackOff.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crashloop
+  namespace: lab
+  labels: {app: crashloop, env: dev}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: crashloop}
+  template:
+    metadata:
+      labels: {app: crashloop, env: dev}
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'starting job'; echo 'ERROR: config file /etc/app/config.yaml not found'; exit 1"]
+          resources:
+            requests: {cpu: 10m, memory: 8Mi}

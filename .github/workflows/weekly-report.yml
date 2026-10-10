@@ -1,0 +1,55 @@
+name: Weekly report (LocalStack)
+
+# Demo reproducible: levanta LocalStack, carga datos de ejemplo y genera el reporte.
+# Para usarlo con una cuenta real, reemplaza LocalStack por credenciales OIDC
+# (aws-actions/configure-aws-credentials) y quita --endpoint-url.
+on:
+  schedule:
+    - cron: "0 9 * * 1" # lunes 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack:4.9
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: ec2,sts
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://localhost:4566
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Esperar a LocalStack
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4566/_localstack/health && exit 0
+            sleep 2
+          done
+          echo "LocalStack no respondió" && exit 1
+      - name: Cargar datos de ejemplo
+        run: python lab/seed_localstack.py
+      - name: Generar reporte
+        run: |
+          mkdir -p reports
+          python 05-reportes/weekly_report.py --env staging --env dev --skip-k8s \
+            --format markdown --output-file reports/weekly-report.md
+          cat reports/weekly-report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weekly-report
+          path: reports/

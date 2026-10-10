@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Grupo en la cuenta puente cuyos miembros pueden asumir el rol ReadOnly en las
+  cuentas destino indicadas, y nada más.
+
+Parameters:
+  TargetAccountIds:
+    Type: CommaDelimitedList
+    Description: IDs de las cuentas destino, separados por coma.
+  GroupName:
+    Type: String
+    Default: hub-readonly-switchers
+
+Resources:
+  SwitchersGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: !Ref GroupName
+
+  AssumeTargetRolesPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Permite sts:AssumeRole solo hacia los roles de solo lectura
+      Groups:
+        - !Ref SwitchersGroup
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AssumeOnlyTargetRoles
+            Effect: Allow
+            Action: sts:AssumeRole
+            # CloudFormation no tiene "map": armamos un ARN por cuenta con Join + Split.
+            # El rol se llama ReadOnly (igual que en target-readonly-role.yaml); si lo
+            # cambias, cámbialo en las dos líneas de abajo.
+            Resource: !Split
+              - ","
+              - !Sub
+                - "arn:aws:iam::${Joined}:role/ReadOnly"
+                - Joined: !Join
+                    - ":role/ReadOnly,arn:aws:iam::"
+                    - !Ref TargetAccountIds
+          - Sid: AllowWhoAmI
+            Effect: Allow
+            Action: sts:GetCallerIdentity
+            Resource: "*"
+
+Outputs:
+  GroupName:
+    Value: !Ref SwitchersGroup

@@ -1,0 +1,20 @@
+# Falla a propósito: pide más CPU de la que tiene cualquier nodo -> Pending (Unschedulable).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: too-big
+  namespace: lab
+  labels: {app: too-big, env: dev}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: too-big}
+  template:
+    metadata:
+      labels: {app: too-big, env: dev}
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.27-alpine
+          resources:
+            requests: {cpu: "100", memory: 64Mi}
