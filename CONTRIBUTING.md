@@ -13,8 +13,8 @@ es que sea **claro para quien empieza** sin perder el nivel técnico.
 ## Preparar el entorno
 
 ```bash
-git clone https://github.com/carotechie/python-automatiza-devops.git
-cd python-automatiza-devops
+git clone https://github.com/carotechie/python-automate-devops-tasks.git
+cd python-automate-devops-tasks
 make setup
 source .venv/bin/activate
 pip install pre-commit && pre-commit install
